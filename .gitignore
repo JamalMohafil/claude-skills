@@ -1,0 +1,9 @@
+# local skill-install test artifacts
+skills-lock.json
+.claude/skills/
+
+# node
+node_modules/
+
+# os
+.DS_Store

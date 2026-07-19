@@ -9,6 +9,7 @@ actually happened and got fixed. Each skill is used daily in my own work.
 
 | Skill | شو بيعمل | What it does |
 |---|---|---|
+| [`agent-starter-kit`](./agent-starter-kit/) | أمر واحد بيركّب كل السكيلز والـ MCPs اللي لازم تبلش فيها أي agent (كلود كود، كودكس، كورسر) | One command installs the essential starter skills + Claude Code plugins/MCPs across 70+ agents |
 | [`arabic-design`](./arabic-design/) | بيخلي تصاميم الـ AI تطلع بعربي سليم — بيصلح فخ الـ letter-spacing، الخطوط، التشكيل، وأخطاء الـ RTL | Makes AI-generated designs render Arabic correctly — fixes the letter-spacing trap, font fallbacks, clipped diacritics, and RTL/bidi bugs |
 
 *(المزيد جاي — تابعني لتعرف أول ما ينزل سكيل جديد | more coming)*

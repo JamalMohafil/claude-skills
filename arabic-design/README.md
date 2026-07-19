@@ -1,43 +1,51 @@
-# arabic-design — سكيل يخلي تصاميم الـ AI تطلع بعربي سليم
+# arabic-design — make AI-generated designs render Arabic correctly
 
-**المشكلة:** كل أدوات الـ AI بتصمم إنجليزي حلو — وأول ما تكتب عربي: الحروف بتتقطع، الكلمات بتنعكس، والتشكيل بينقص.
-**السبب الأساسي:** الـ AI متعود على التصميم الإنجليزي فبيحط `letter-spacing` سالب — والحروف العربية متصلة، فالمسافة السالبة بتكسرها. وفوقها خطوط ما بتدعم العربي وأخطاء اتجاه (RTL).
-**الحل:** هالسكيل بيحقن القواعد الصح بكلود — فأي تصميم فيه عربي بيطلع سليم تلقائياً.
+**The problem:** every AI tool designs beautiful English — but the moment you add Arabic, the
+letters disconnect, words reverse, and diacritics get clipped.
+**The root cause:** the AI is tuned for English design, so it applies negative `letter-spacing` —
+and Arabic is a *connected* script, so negative tracking shatters it. On top of that it picks fonts
+with no Arabic glyphs and gets the RTL direction wrong.
+**The fix:** this skill injects the correct rules into your agent — so any design containing Arabic
+comes out clean automatically.
 
-بُني من قواعد مجرّبة على مئات التصاميم العربية الحقيقية — كل قاعدة فيه كانت غلطة متكررة وانحلت.
+Built from rules battle-tested on hundreds of real Arabic designs — every rule in it is a bug that
+kept happening and got fixed.
 
-## التركيب (٣٠ ثانية)
+## Install (30 seconds)
 
-**Claude Code — لمشروع واحد:**
+**With the `skills` CLI (Claude Code, Codex, Cursor, and 70+ agents):**
+```bash
+npx -y skills add JamalMohafil/claude-skills --skill arabic-design --agent claude-code
+```
+
+**Or manually — one project:**
 ```bash
 mkdir -p .claude/skills/arabic-design
-cp SKILL.md .claude/skills/arabic-design/SKILL.md
+curl -o .claude/skills/arabic-design/SKILL.md \
+  https://raw.githubusercontent.com/JamalMohafil/claude-skills/main/arabic-design/SKILL.md
 ```
 
-**Claude Code — لكل مشاريعك:**
+**Or manually — all your projects:**
 ```bash
 mkdir -p ~/.claude/skills/arabic-design
-cp SKILL.md ~/.claude/skills/arabic-design/SKILL.md
+curl -o ~/.claude/skills/arabic-design/SKILL.md \
+  https://raw.githubusercontent.com/JamalMohafil/claude-skills/main/arabic-design/SKILL.md
 ```
 
-بعدها اطلب أي تصميم فيه عربي — السكيل بيشتغل لحاله، وبيصلح: المسافات السالبة، الخط، ارتفاع السطر للتشكيل، اتجاه النص المختلط (عربي + إنجليزي)، والأيقونات الاتجاهية.
+Then ask for any design containing Arabic — the skill activates on its own and fixes negative
+spacing, the font, line-height for diacritics, mixed Arabic+Latin direction, and directional icons.
 
-## شو بيغطي
+## What it covers
 
-| المشكلة | القاعدة |
+| Problem | Rule |
 |---|---|
-| حروف متقطعة/متلاصقة | ممنوع `letter-spacing` سالب أو موجب على العربي |
-| خط بيطلع مكسور | خطوط عربية حقيقية مع fallback صحيح |
-| التشكيل مقصوص | line-height بيفسح للتشكيل |
-| «الكلمات معكوسة» | قواعد الـ RTL والـ bidi (بما فيها تسريب `direction:ltr` وفخ «الـ» قبل الكلمة الإنجليزية) |
-| علامات الترقيم بالجهة الغلط | عزل الكلمات اللاتينية + ترقيم عربي |
-| نص صغير بيختفي عالموبايل | حدود دنيا لحجم ووزن الخط |
+| Letters disconnected / crushed together | Never negative *or* positive `letter-spacing` on Arabic |
+| Font renders broken | Real Arabic fonts with a correct fallback stack |
+| Clipped diacritics | Line-height that clears the diacritics |
+| "The words are reversed" | RTL/bidi rules (incl. the `direction:ltr` leak and the `الـ`-before-Latin-word trap) |
+| Punctuation on the wrong side | Isolating Latin words + Arabic punctuation |
+| Small text disappears on mobile | Minimum size and weight thresholds |
 
 ---
 
-**Made by [@jamal_mohafil](https://instagram.com/jamal_mohafil)** — أبني بالـ AI وأوثق كل شي بالعربي.
-
-*English: A Claude skill that makes AI-generated designs render Arabic correctly — fixes the
-negative letter-spacing trap that breaks connected script, wrong font fallbacks, clipped
-diacritics, and RTL/bidi bugs. Drop `SKILL.md` into `.claude/skills/arabic-design/` and any
-design containing Arabic comes out clean automatically.*
+**Made by [@jamal_mohafil](https://instagram.com/jamal_mohafil)** — I build with AI and document everything in Arabic.

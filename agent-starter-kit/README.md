@@ -1,51 +1,52 @@
-# agent-starter-kit — كل السكيلز والـ MCPs اللي لازم تبلش فيها
+# agent-starter-kit — the skills and MCPs to start any agent with
 
-بدل ما تدوّر على السكيلات والإضافات وحدة وحدة كل ما تفتح مشروع جديد — **أمر واحد** بيركّبلك
-الأساسيات اللي بتخلي أي agent (كلود كود، كودكس، كورسر...) يبلش وهو فعلاً قوي: يلاقي ويركّب
-سكيلات لحاله، يسوق متصفح، يفكّر بقواعد، يصمّم واجهات نظيفة (بالعربي كمان)، يراجع كوده، ويأتمت
-المتصفح وGitHub.
+Instead of hunting down skills and extensions one by one every time you open a new project,
+**one command** installs the essentials that make any agent (Claude Code, Codex, Cursor…) start
+out genuinely capable: it can find and install more skills on its own, drive a browser, reason
+with guardrails, design clean UI (Arabic included), review its own code, and automate the browser
+and GitHub.
 
-One command installs the skills + plugins + MCP servers worth having the moment you open a
-new agent — instead of hunting each one down.
+One command installs the skills + plugins + MCP servers worth having the moment you open a new
+agent.
 
-## التركيب | Install
+## Install
 
 ```bash
-# نزّل السكيل (أو انسخ الريبو)
+# get the skill (or clone the repo)
 npx -y skills add JamalMohafil/claude-skills --skill agent-starter-kit --agent claude-code
 
-# بعدها شغّل المُركّب من مجلد السكيل:
+# then run the installer from the skill directory:
 bash ~/.claude/skills/agent-starter-kit/install.sh
 ```
 
-خيارات | Options:
+Options:
 
 ```bash
-bash install.sh                 # كلود كود — بيركّب كل شي
-bash install.sh --agent cursor  # كورسر — بيركّب السكيلز (Tier 1)
-bash install.sh --agent codex   # كودكس — بيركّب السكيلز (Tier 1)
-bash install.sh --agent '*'     # كل agent متوفّر
-bash install.sh --skills-only   # بدون إضافات كلود كود
+bash install.sh                 # Claude Code — installs everything
+bash install.sh --agent cursor  # Cursor — installs the Tier 1 skills
+bash install.sh --agent codex   # Codex  — installs the Tier 1 skills
+bash install.sh --agent '*'     # every detected agent
+bash install.sh --skills-only   # skip the Claude-Code-only plugins/MCPs
 ```
 
-المُركّب **آمن تعيد تشغيله** — كل عنصر بينركّب لحاله، وأي شي ما ينركّب تلقائياً بيطبعلك الأمر
-اليدوي بالضبط لتخلّصه.
+The installer is **safe to re-run** — each item installs independently, and anything it can't
+install automatically prints the exact manual command to finish it.
 
-## شو بينركّب | What it installs
+## What it installs
 
-**Tier 1 — سكيلز (بتشتغل على 70+ agent عبر `npx skills`):**
-find-skills · agent-browser · karpathy-guidelines · ui-ux-pro-max · caveman · **arabic-design** (تبعنا)
+**Tier 1 — Skills (work on 70+ agents via `npx skills`):**
+find-skills · agent-browser · karpathy-guidelines · ui-ux-pro-max · caveman · **arabic-design** (ours)
 
-**Tier 2 — إضافات / MCPs (كلود كود فقط):**
+**Tier 2 — Plugins / MCPs (Claude Code only):**
 frontend-design · superpowers · code-review · playwright (MCP) · github (MCP) · claude-md-management
 
-## ملاحظة صدق | Honest scope
+## Honest scope
 
-- **Tier 1 عبر كل الـ agents فعلاً** — `npx skills` بيدعم 70+ agent.
-- **Tier 2 لكلود كود بس.** كودكس/كورسر ما عندهم "plugins"، بس عنصرين منهم (`playwright`,
-  `github`) هم أصلاً MCP servers فيك تضيفهم لكودكس/كورسر عبر إعدادات الـ MCP تبعهم — والمُركّب
-  بيقلك هيك لما تمرّر `--agent` مش كلود.
+- **Tier 1 is genuinely cross-agent** — `npx skills` supports 70+ agents.
+- **Tier 2 is Claude Code only.** Codex/Cursor have no "plugin" concept. But two of them
+  (`playwright`, `github`) are MCP servers, so you can still add them to Codex/Cursor through that
+  agent's own MCP config — the installer tells you so when you pass a non-Claude `--agent`.
 
 ---
 
-**Made by [@jamal_mohafil](https://instagram.com/jamal_mohafil)** — أبني بالـ AI وأوثق كل شي بالعربي.
+**Made by [@jamal_mohafil](https://instagram.com/jamal_mohafil)** — I build with AI and document everything in Arabic.

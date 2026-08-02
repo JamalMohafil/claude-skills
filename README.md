@@ -8,6 +8,7 @@ own work.
 
 | Skill | What it does |
 |---|---|
+| [`security-review`](./security-review/) | Recreates Claude Code's `/security-review` in **any** agent — audits your diff/PR for real, exploitable vulnerabilities (injection, auth bypass, secrets, RCE, XSS…) with a strict two-pass false-positive filter, then optionally fixes them |
 | [`agent-starter-kit`](./agent-starter-kit/) | One command installs the essential starter skills + Claude Code plugins/MCPs across 70+ agents |
 | [`arabic-design`](./arabic-design/) | Makes AI-generated designs render Arabic correctly — fixes the letter-spacing trap, font fallbacks, clipped diacritics, and RTL/bidi bugs |
 

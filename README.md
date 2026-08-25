@@ -10,6 +10,7 @@ own work.
 |---|---|
 | [`claude-arabic`](./claude-arabic/) | Makes **Claude Code show Arabic correctly inside VS Code** (connected letters, right-to-left order) on macOS + Windows — one command installs the [Claude Arabic Terminal](https://github.com/JamalMohafil/claude-arabic-terminal) extension, then you just run `arabic claude` |
 | [`security-review`](./security-review/) | Recreates Claude Code's `/security-review` in **any** agent — audits your diff/PR for real, exploitable vulnerabilities (injection, auth bypass, secrets, RCE, XSS…) with a strict two-pass false-positive filter, then optionally fixes them |
+| [`youtube-chapters`](./youtube-chapters/) | Give any agent a **YouTube link or a video/audio file** and get ready-to-paste **chapter timestamps** — pulls the timed transcript (yt-dlp captions, or Whisper for files/no-caption videos), then segments it into clean chapters. Works in any language, Arabic/RTL included |
 | [`agent-starter-kit`](./agent-starter-kit/) | One command installs the essential starter skills + Claude Code plugins/MCPs across 70+ agents |
 | [`arabic-design`](./arabic-design/) | Makes AI-generated designs render Arabic correctly — fixes the letter-spacing trap, font fallbacks, clipped diacritics, and RTL/bidi bugs |
 

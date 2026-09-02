@@ -13,6 +13,7 @@ own work.
 | [`youtube-chapters`](./youtube-chapters/) | Give any agent a **YouTube link or a video/audio file** and get ready-to-paste **chapter timestamps** — pulls the timed transcript (yt-dlp captions, or Whisper for files/no-caption videos), then segments it into clean chapters. Works in any language, Arabic/RTL included |
 | [`agent-starter-kit`](./agent-starter-kit/) | One command installs the essential starter skills + Claude Code plugins/MCPs across 70+ agents |
 | [`arabic-design`](./arabic-design/) | Makes AI-generated designs render Arabic correctly — fixes the letter-spacing trap, font fallbacks, clipped diacritics, and RTL/bidi bugs |
+| [`content-os-builder`](./content-os-builder/) | Builds you a **personalized content OS** — a local dashboard (Ideas · Radar · Carousels · Stories · Scripts · Calendar · Analytics · Growth) with a trend-radar, an HTML→PNG export engine, and background AI generation. Interviews you first, then generates everything around **your** brand: one machine-readable brand kit every AI surface reads, a validated + deduplicated idea store, and an approve-before-generate review queue |
 
 *(More coming — follow to hear when a new skill drops.)*
 

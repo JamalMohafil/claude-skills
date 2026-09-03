@@ -1,6 +1,6 @@
 # content-os-builder
 
-A portable **skill** that builds a personalized **content operating system** for any creator or brand — a local dashboard (Strategy · Ideas · Radar · Carousels · Stories · Presentations · Scripts · Calendar · Gallery · Analytics · Inspiration · Growth) with a live trend-radar, an HTML→PNG export engine, a design system, background AI generation, real Instagram/YouTube analytics (your posts, insights, comments, inline playback, click-to-transcribe), and a competitor study library.
+A portable **skill** that builds a personalized **content operating system** for any creator or brand — a local dashboard (Strategy · Ideas · Radar · Carousels · Stories · Presentations · Scripts · Calendar · Gallery · Analytics · Inspiration · Growth · Assistant) with a live trend-radar, an HTML→PNG export engine, a design system, background AI generation, real Instagram/YouTube analytics (your posts, insights, comments, inline playback, click-to-transcribe), and a competitor study library.
 
 It **interviews the user first** (brand colors, visual identity, platforms, voice, radar topics, no-gos) and then generates the whole OS around those answers. Nothing is hardcoded to one brand.
 
@@ -32,6 +32,7 @@ It **interviews the user first** (brand colors, visual identity, platforms, voic
 | `references/4-builders-and-export.md` | Per-format builders + the Playwright HTML→PNG export engine + the scaffold script. |
 | `references/5-radar-and-calendar.md` | The trend-scout (on-demand + scheduled), its **health check**, and the interactive Notion-style calendar. |
 | `references/8-publish-and-growth.md` | The publish panel + the no-auto-publish guarantee, and the Growth loop that turns results back into next week's ideas. |
+| `references/9-assistant-chat.md` | The brand-aware chat: a conversation store, the SSE streaming contract, markdown + per-message direction, and the routing traps that make a send silently do nothing. |
 | `references/6-analytics-and-inspiration.md` | Real Instagram/YouTube analytics, competitor study, inline playback, click-to-transcribe — with every verified API quirk and the traps that break each one. |
 
 > Stage order and file numbers deliberately don't match — references 7 and 8 were added later and slot into the middle. `SKILL.md` has the table; follow that, not the filenames.
@@ -51,3 +52,5 @@ Everything lands under `content-os/` in the target project: the brand kit + docs
 The **architecture** is distilled from a content OS I run every day — the traps documented here (Tailwind v4 dropping the font `@import`, Playwright resolving fonts before `document.fonts.ready`, the Instagram `paging` object having no `next` key, a scheduled radar failing silently for weeks) are all bugs that actually happened and got fixed.
 
 The **builder itself** has not yet been run start-to-finish on a fresh brand. Treat it as a well-specified playbook rather than a one-click installer, and run each stage's checkpoint as you go — they're there to catch exactly that.
+
+Reference 9 is the newest and the most battle-tested: every rule in it came out of building the assistant for real, then having three adversarial reviewers and a live browser session take it apart — an unhandled `EPIPE` that killed the whole dev server, Arabic corrupted by a `TextDecoder` missing `{stream:true}`, a route change unmounting a component mid-request, and a disabled button that made a perfectly working backend look broken.

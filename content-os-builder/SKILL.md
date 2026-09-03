@@ -1,6 +1,6 @@
 ---
 name: content-os-builder
-description: Build a personalized "content OS" for any creator/brand — a local dashboard app (Strategy · Ideas · Radar · Carousels · Stories · Presentations · Scripts · Calendar · Gallery · Analytics · Inspiration · Growth) built on one machine-readable brand kit that every AI surface reads, a validated + deduplicated idea store with an approve-before-generate review queue, a live trend-radar, an HTML→PNG export engine, a design system, background AI generation, real Instagram/YouTube analytics (posts, insights, comments, inline playback, click-to-transcribe) and a competitor study library. WORKS WITH ANY CODING AGENT (Claude Code, Codex, Kimi, Cursor…). It ALWAYS runs a brand intake interview FIRST (colors, visual identity, platforms, voice, radar topics, no-gos, API credentials, competitors), then generates the whole OS around the answers. Use when someone says "build me a content OS / content system", "make me something like jamal-os", "a dashboard to run my content", "track my posts and competitors", or "an AI content operating system for my brand".
+description: Build a personalized "content OS" for any creator/brand — a local dashboard app (Strategy · Ideas · Radar · Carousels · Stories · Presentations · Scripts · Calendar · Gallery · Analytics · Inspiration · Growth · a brand-aware chat Assistant) — every view a real route, built on one machine-readable brand kit that every AI surface reads, a validated + deduplicated idea store with an approve-before-generate review queue, a live trend-radar, an HTML→PNG export engine, a design system, background AI generation, real Instagram/YouTube analytics (posts, insights, comments, inline playback, click-to-transcribe) and a competitor study library. WORKS WITH ANY CODING AGENT (Claude Code, Codex, Kimi, Cursor…). It ALWAYS runs a brand intake interview FIRST (colors, visual identity, platforms, voice, radar topics, no-gos, API credentials, competitors), then generates the whole OS around the answers. Use when someone says "build me a content OS / content system", "make me something like jamal-os", "a dashboard to run my content", "track my posts and competitors", or "an AI content operating system for my brand".
 ---
 
 # Content OS Builder
@@ -56,8 +56,9 @@ After each stage tell the user what you did in one line.
 | 5 | Generation + export engine | `4-builders-and-export.md` |
 | 6 | Radar + calendar | `5-radar-and-calendar.md` |
 | 7 | Publish + Growth | `8-publish-and-growth.md` |
-| 8 | Analytics + Inspiration *(optional)* | `6-analytics-and-inspiration.md` |
-| 9 | Verify + handoff | *(below)* |
+| 8 | **Assistant (chat)** *(optional but high value)* | **`9-assistant-chat.md`** |
+| 9 | Analytics + Inspiration *(optional)* | `6-analytics-and-inspiration.md` |
+| 10 | Verify + handoff | *(below)* |
 
 **Stage 0 — Prerequisites (probe three INDEPENDENT capabilities, don't assume).** These are separate axes — test each and pick the matching mode:
 1. **Node ≥ 18 + package manager?** No → **Lite Mode** (files + scripts, no web app).
@@ -78,11 +79,13 @@ After each stage tell the user what you did in one line.
 
 **Stage 7 — Publish + Growth (close the loop).** The publish panel (assets + caption + one CTA + a pre-publish checklist), the **three-layer no-auto-publish guarantee** and its verify script, then the Growth view — metrics, the weekly review, and hooks that graduate into the bank **with their real number**. Without this the OS produces forever and learns nothing. → `references/8-publish-and-growth.md`
 
-**Stage 8 — Analytics + Inspiration + Transcription** *(only if the user gave credentials in Q9 — otherwise skip and say so).* Their own posts with real insights, comments, inline playback, click-to-transcribe; an account-level audience tab; a competitor library with hooks, public numbers, playback and transcripts. **Validate every credential live BEFORE building on it** (a dead Meta token is the #1 blocker) and tell the user exactly how to fix any that fail. → `references/6-analytics-and-inspiration.md`
+**Stage 8 — The Assistant (chat) surface** *(optional, but the highest-value view per line of code).* A chat pane that opens with the strategy block, so the user can ask for hooks or a rewrite without re-explaining their brand. Conversations are a real store (`chats.json`), each one a real route (`/assistant/<id>`), replies render as markdown with per-message direction, and the agent runs **with its tools disabled** so it answers instead of announcing it will go read files. → `references/9-assistant-chat.md`
 
-**Stage 9 — Verify + handoff.** Typecheck (`tsc --noEmit`) — and prefer typecheck over a full build if the user has a dev server running, since building wipes `.next`. **Never start a dev server to "verify"** — the user runs that. Run the **end-to-end walkthrough** below, then print how to run it (`<pm> dev` in `content-os/app`), where assets land, how the radar scheduler was installed and how to remove it, and remind them to **rotate any API key pasted into the chat**.
+**Stage 9 — Analytics + Inspiration + Transcription** *(only if the user gave credentials in Q9 — otherwise skip and say so).* Their own posts with real insights, comments, inline playback, click-to-transcribe; an account-level audience tab; a competitor library with hooks, public numbers, playback and transcripts. **Validate every credential live BEFORE building on it** (a dead Meta token is the #1 blocker) and tell the user exactly how to fix any that fail. → `references/6-analytics-and-inspiration.md`
 
-### The Stage 9 walkthrough — do all six, in order
+**Stage 10 — Verify + handoff.** Typecheck (`tsc --noEmit`) — and prefer typecheck over a full build if the user has a dev server running, since building wipes `.next`. **Never start a dev server to "verify"** — the user runs that. Run the **end-to-end walkthrough** below, then print how to run it (`<pm> dev` in `content-os/app`), where assets land, how the radar scheduler was installed and how to remove it, and remind them to **rotate any API key pasted into the chat**.
+
+### The Stage 10 walkthrough — do all seven, in order
 
 Per-stage checkpoints catch broken parts. This catches a broken *loop*, which is a different failure.
 
@@ -92,7 +95,8 @@ Per-stage checkpoints catch broken parts. This catches a broken *loop*, which is
 3. Try to generate from a `new` idea → **409**. Approve it → generation runs
 4. The piece exports at the right dimensions, in the brand font, with exactly the CTA the record specified (**or none**, if it was null)
 5. The idea flipped to `produced`; the calendar event moves planned → published; the publish panel shows real assets
-6. `node tools/verify-publishing-safety.mjs` exits 0 — and exits 1 when you temporarily move a publish tool into `allow`
+6. If the assistant was built: a starter prompt from the empty state gets a reply (the path that breaks when navigation happens mid-turn), Arabic and English both render un-mangled, and a reload keeps the conversation
+7. `node tools/verify-publishing-safety.mjs` exits 0 — and exits 1 when you temporarily move a publish tool into `allow`
 
 Report honestly which of the six passed. **Do not report the build as done with a failing step
 unmentioned** — say which one failed and what you tried.
@@ -132,6 +136,7 @@ Everything else (voice, no-gos, pillars, CTAs) still comes from the interview. T
 - **RTL correctness** if the primary language is RTL: set `dir` at the root, use logical CSS properties, never hardcode `dir` per element, never apply negative letter-spacing to Arabic. (See reference 2.)
 - **Local-only AI actions.** Routes that spawn a coding agent or skip permissions must be **guarded to local/dev** (return 403 in production) — they run the user's own agent CLI on their machine. And the dashboard has **no publish endpoint**.
 - **The filesystem is the database.** No DB/ORM. API routes read/write real files under `content-os/` and are non-cached (`force-dynamic` / `no-store`).
+- **⭐ A control that refuses must say why.** Every disabled button, skipped guard and early return needs a visible reason. A silently inert control is indistinguishable from a broken backend, and that mistake costs hours of debugging in the wrong layer.
 - **Verify by typecheck/build, not by the dev server.** Never start a long-running dev server to "check" — the user runs that.
 
 Start by reading `references/1-interview.md`, then run the interview.

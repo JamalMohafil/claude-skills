@@ -64,7 +64,35 @@ route enforces it with a 409, but a button that 409s is a bug you shipped, not a
 ## Conventions that avoid real bugs (learned the hard way)
 - **Inline SVG icons**, not emoji, in the UI chrome. A small icon map + `<Icon n="..."/>`.
 - **Render every `.md`** (scripts, brand docs, calendar body preview) with `react-markdown` + `remark-gfm` (installed above). Don't hand-roll markdown.
-- **URL-hash navigation** so reload/back keep the current tab: write `location.hash = view` on change; on mount read the hash and restore; listen to `hashchange`. **Skip the first hash-write on mount** so it doesn't clobber the restored hash back to "home".
+- **⭐ Every view is a REAL route, and the URL is the single source of truth for "where am I".**
+  Do NOT use hash navigation (`location.hash = view` + a `hashchange` listener). It looks equivalent
+  and is not: the address bar shows a bare origin, links can't be shared or middle-clicked, and you
+  end up with `view` in React state *and* in the hash — two sources of truth that drift, which is
+  why that approach needs a "skip the first write on mount so it doesn't clobber the restored hash"
+  hack. If you find yourself writing that hack, you picked the wrong mechanism.
+  Since the whole dashboard is one client component, one **optional catch-all** segment serves every
+  view — no per-view folder duplication:
+  ```
+  app/[[...view]]/page.tsx     ← the entire dashboard; there is NO app/page.tsx (it would conflict)
+  ```
+  ```tsx
+  const pathname = usePathname(); const router = useRouter();
+  const parts = (pathname || "/").split("/").filter(Boolean);
+  const slug = parts[0] || "home";
+  const view: View = (slug in META ? slug : "home") as View;   // DERIVED — never mirrored into state
+  const sub  = parts[1] ?? null;                                // a detail id, e.g. /assistant/<chat-id>
+  const setView = useCallback((v: View) => { router.push(v === "home" ? "/" : `/${v}`); }, [router]);
+  ```
+  - Static `api/*` route handlers win over the catch-all, so `/api/...` is **not** swallowed — verify
+    it in the build output, which must list each `/api/*` separately alongside `ƒ /[[...view]]`.
+  - Sidebar items are `<Link href>`, not `<button onClick>` — middle-click, ctrl-click and hover
+    preview only work on a real anchor.
+  - An unknown slug renders home; `router.replace("/")` so the address bar stops lying about it.
+    Strip a sub-segment on views that have no detail page (`/ideas/junk` → `/ideas`).
+  - **A detail view puts its id in the path too** — `/assistant/<chat-id>`, not internal state. Use
+    `router.replace` (never `push`) whenever you are *correcting* the address — auto-opening the
+    newest item, adopting a server-recovered id — so the back button doesn't walk through synthetic
+    steps the user never took.
 - **Media viewer** lists ALL slides of a piece and cache-busts images with `&v=<mtime>` so a re-exported slide actually refreshes (same URL caches stale otherwise).
 - **Asset route** serves only `.png` under the content dir and blocks path traversal. The scripts route sanitizes the slug (`replace(/[^a-z0-9-]/gi,"")`) before reading.
 - **First-load safety:** every filesystem READ route must tolerate a missing file — wrap the read in try/catch and return an empty default (`{events:[]}`, `[]`, `""`), **never throw**. On a fresh build the files don't exist yet, so also **seed** `calendar.json` = `{"events":[]}`, `ideas.json` = `{"version":1,"updated_at":null,"ideas":[]}`, an empty `radar/feed.md`, and an empty `growth/metrics.md` during the build, or the first page open 500s.
@@ -115,6 +143,9 @@ function start(prompt:string, seed:Partial<Job>){
   // and needs a --max-turns cap so a scaffold→build→export run doesn't stall. Both are mandatory.
   const child = spawn("claude", ["--print","--verbose","--output-format","stream-json","--max-turns","60","--dangerously-skip-permissions"], { cwd:ROOT, env:{...process.env}, shell:true });
   store.__child = child;
+  // ⭐ MANDATORY. Without this listener an EPIPE on stdin is an UNCAUGHT exception and the whole
+  // Node process exits — not the request, the server. See "the EPIPE trap" below.
+  child.stdin.on("error", () => { /* child died before draining the prompt; close() settles the job */ });
   child.stdin.write(prompt); child.stdin.end();
   child.stdout.on("data",(d:Buffer)=>{ for(const line of d.toString().split("\n").filter(Boolean)){ try{ const p=JSON.parse(line);
     // ↓ this parse is Claude's stream-json shape specifically — see "Adapting to another agent" below
@@ -133,6 +164,27 @@ export async function GET(){ if(process.env.NODE_ENV==="production")return Respo
 export async function DELETE(){ if(process.env.NODE_ENV==="production")return Response.json({error:"local only"},{status:403});
   try{store.__child?.kill("SIGTERM");}catch{} const j=store.__job; if(j&&j.status==="running"){j.status="error";j.finishedAt=Date.now();j.logs.push("⏹️ stopped");} store.__child=null; return Response.json({status:"stopped"}); }
 ```
+
+### ⭐ The EPIPE trap — the one that takes down the whole server
+
+**Every route that spawns the agent CLI must attach `child.stdin.on("error", …)` BEFORE writing the
+prompt.** Not for tidiness — without it, a write to a dead child's stdin raises `EPIPE` as an
+*uncaught exception* and Node **exits the entire server process**. The user sees the dev server die,
+with no obvious connection to the button they pressed.
+
+It is not a rare edge case, because these prompts are big. The OS pipe buffer is **65536 bytes**.
+Measured on a real deployment: the brand corpus injected into the assistant prompt was already
+**59,377 bytes** — about 6 KB of headroom before the write blocks and the process becomes dependent
+on the child draining it. Add a few turns of conversation and you are over. And a Latin-only
+estimate understates it: **Arabic and other non-Latin text is ~2 bytes per character in UTF-8**, so
+a prompt that looks half the size of the limit isn't.
+
+Triggers, all routine: the agent CLI isn't logged in (exits instantly), isn't resolvable under
+`shell: true` (exit 127), or the user hits Stop / reloads in the first milliseconds.
+
+Audit it: `grep -c 'stdin.on("error"' src/app/api/*/route.ts` must be ≥1 for **every** spawn route.
+On the reference implementation that count was **0 across all five** — the guard is easy to leave
+out of each new route you add, so check them all, not just the one you just wrote.
 
 ### Adapting to another agent (Codex / Cursor / Gemini / Kimi) — THREE things change, not one
 The binary, its flags, AND the stdout parser are all agent-specific. Do not just swap the binary.
@@ -167,7 +219,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-`src/app/page.tsx` — the shape (fill views from the kit):
+`src/app/[[...view]]/page.tsx` — the shape (fill views from the kit):
 ```tsx
 "use client";
 import { useEffect, useState, useCallback } from "react";
@@ -176,11 +228,16 @@ const P: Record<string, React.ReactNode> = { ideas:<path d="…"/>, radar:<path 
 function Icon({ n, size=18 }: { n:string; size?:number }){ return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">{P[n]}</svg>; }
 type View = "home"|"ideas"|"radar"|"scripts"|"calendar"/*…only chosen views*/;
 export default function Dashboard(){
-  const [view,setView] = useState<View>("home");
-  // hash router — restore on mount, then sync (skip first write so we don't clobber the restored hash)
-  useEffect(()=>{ const apply=()=>{ const h=location.hash.replace(/^#/,""); if(h) setView(h as View); }; apply(); addEventListener("hashchange",apply); return ()=>removeEventListener("hashchange",apply); },[]);
-  const first = useState(true); useEffect(()=>{ if(first[0]){ first[1](false); return; } if(location.hash.replace(/^#/,"")!==view) location.hash=view; },[view]);
-  return <div className="flex h-screen"><aside>/* sidebar: only chosen views, <Icon n={v}/> + name */</aside><main className="flex-1 overflow-auto p-6">{/* switch(view) → the view */}</main></div>;
+  // The URL is the source of truth — DERIVED, never mirrored into state (see the routing rule above).
+  const pathname = usePathname(); const router = useRouter();
+  const parts = (pathname || "/").split("/").filter(Boolean);
+  const slug = parts[0] || "home";
+  const view: View = (slug in META ? slug : "home") as View;
+  const sub = parts[1] ?? null;                       // a detail id, e.g. /assistant/<chat-id>
+  const setView = useCallback((v: View) => { router.push(v === "home" ? "/" : `/${v}`); }, [router]);
+  useEffect(()=>{ if(slug!=="home" && !(slug in META)) router.replace("/"); },[slug,router]);  // unknown slug
+  return <div className="flex h-screen"><aside>/* sidebar: <Link href> per chosen view, <Icon n={v}/> + name */</aside>
+    <main className={view==="assistant" ? "flex-1 min-h-0 overflow-hidden" : "flex-1 overflow-auto p-6"}>{/* switch(view) */}</main></div>;
 }
 ```
 

@@ -73,7 +73,7 @@ After each stage tell the user what you did in one line.
 
 **Stage 4 — The dashboard app.** START with the **Stage 3.0 bootstrap** (the exact `create-next-app` command + the Tailwind-**v4** setup — no `tailwind.config.js`) before writing any feature; a weak model that skips it ships an unstyled or non-existent app. Then build the sidebar + views, filesystem-as-database API routes (each try/catch → empty default, and seed the empty data files), dark/light theme, RTL if needed, URL-hash navigation, inline SVG icons (NO emoji in the UI chrome). Ideas is a **review queue** (approve / reject-with-a-reason), and Strategy is **read-only**. → `references/3-dashboard-app.md`
 
-**Stage 5 — Background AI generation + the export engine.** Wire the `/api/generate` (and `/api/radar`) **background-job** pattern (survives reload, has Stop, reconnects), the Playwright HTML→PNG export engine, the scaffold script, and the per-format builder specs (carousel/story/presentation/script/thumbnail). Generation is **gated on an approved idea** and takes an `idea_id`, never a free string. → `references/4-builders-and-export.md`
+**Stage 5 — Background AI generation + the export engine.** The Produce views (Carousels/Stories/Presentations) are **one reused component** that shows approved ideas on top and the produced pieces of that collection below, refreshing itself when a job ends — an idea must visibly *become* a piece in the same screen. Wire the `/api/generate` (and `/api/radar`) **background-job** pattern (survives reload, has Stop, reconnects), the Playwright HTML→PNG export engine, the scaffold script, and the per-format builder specs (carousel/story/presentation/script/thumbnail). Generation is **gated on an approved idea** and takes an `idea_id`, never a free string. → `references/4-builders-and-export.md`
 
 **Stage 6 — Radar + interactive calendar.** The scout prompt from the strategy renderer + the user's topics/sources/no-gos, emitting **structured JSON against the contract**; the on-demand `/api/radar` route; a scheduled daily run (cron/launchd/Task Scheduler) that ingests through the same code path as the app; and a **health check with a visible banner** — a scheduled job nobody watches fails silently, which is the failure mode that actually happens. Then the Notion-style month calendar backed by a JSON store, with rich items (title, type, platform, pillar, status, description, markdown body). Optionally wire read-only connectors (Notion import) if the user has them. → `references/5-radar-and-calendar.md`
 
@@ -81,11 +81,11 @@ After each stage tell the user what you did in one line.
 
 **Stage 8 — The Assistant (chat) surface** *(optional, but the highest-value view per line of code).* A chat pane that opens with the strategy block, so the user can ask for hooks or a rewrite without re-explaining their brand. Conversations are a real store (`chats.json`), each one a real route (`/assistant/<id>`), replies render as markdown with per-message direction, and the agent runs **with its tools disabled** so it answers instead of announcing it will go read files. → `references/9-assistant-chat.md`
 
-**Stage 9 — Analytics + Inspiration + Transcription** *(only if the user gave credentials in Q9 — otherwise skip and say so).* Their own posts with real insights, comments, inline playback, click-to-transcribe; an account-level audience tab; a competitor library with hooks, public numbers, playback and transcripts. **Validate every credential live BEFORE building on it** (a dead Meta token is the #1 blocker) and tell the user exactly how to fix any that fail. → `references/6-analytics-and-inspiration.md`
+**Stage 9 — Analytics + Inspiration + Transcription** *(only if the user gave credentials in Q9 — otherwise skip and say so).* Their own posts with real insights, comments, inline playback, click-to-transcribe; an account-level audience tab; a competitor library with hooks, public numbers, playback and transcripts. **Two deliverables: the grids AND the post detail window that opens on click** — the window is the half that gets skipped, and without it a competitor library teaches nothing (their captions are often just the keyword gate; the value is in the transcript). **Validate every credential live BEFORE building on it** (a dead Meta token is the #1 blocker) and tell the user exactly how to fix any that fail. → `references/6-analytics-and-inspiration.md`
 
 **Stage 10 — Verify + handoff.** Typecheck (`tsc --noEmit`) — and prefer typecheck over a full build if the user has a dev server running, since building wipes `.next`. **Never start a dev server to "verify"** — the user runs that. Run the **end-to-end walkthrough** below, then print how to run it (`<pm> dev` in `content-os/app`), where assets land, how the radar scheduler was installed and how to remove it, and remind them to **rotate any API key pasted into the chat**.
 
-### The Stage 10 walkthrough — do all seven, in order
+### The Stage 10 walkthrough — do all eight, in order
 
 Per-stage checkpoints catch broken parts. This catches a broken *loop*, which is a different failure.
 
@@ -93,10 +93,11 @@ Per-stage checkpoints catch broken parts. This catches a broken *loop*, which is
 2. Run the radar once → `radar/runs/<id>.json` exists, `ideas.json` grew. Run it **again** → the same stories come back **deduplicated**, not inserted
 2b. **Break it on purpose** — rename `brand-kit.json`, run the cron script: it must abort *before* spending a scan, log a `fail` row, and raise the banner in the UI. Restore, confirm the banner clears
 3. Try to generate from a `new` idea → **409**. Approve it → generation runs
-4. The piece exports at the right dimensions, in the brand font, with exactly the CTA the record specified (**or none**, if it was null)
+4. The piece exports at the right dimensions, in the brand font, with exactly the CTA the record specified (**or none**, if it was null) — **and it appears in that format's own view without a manual reload**. An empty Carousels tab after a successful job is the #1 build failure: the view was never wired to the filesystem
 5. The idea flipped to `produced`; the calendar event moves planned → published; the publish panel shows real assets
 6. If the assistant was built: a starter prompt from the empty state gets a reply (the path that breaks when navigation happens mid-turn), Arabic and English both render un-mangled, and a reload keeps the conversation
-7. `node tools/verify-publishing-safety.mjs` exits 0 — and exits 1 when you temporarily move a publish tool into `allow`
+7. If analytics was built: clicking a card — **your own AND a competitor's** — opens the detail window, plays, and transcribes
+8. `node tools/verify-publishing-safety.mjs` exits 0 — and exits 1 when you temporarily move a publish tool into `allow`
 
 Report honestly which of the six passed. **Do not report the build as done with a failing step
 unmentioned** — say which one failed and what you tried.

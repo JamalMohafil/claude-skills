@@ -61,6 +61,55 @@ a `seen_count` badge when the radar keeps resurfacing it, **Approve** / **Reject
 required reason box), and Generate buttons that are **disabled until status is `approved`** — the
 route enforces it with a 409, but a button that 409s is a bug you shipped, not a guardrail.
 
+## ⭐ The Produce views — where an idea becomes a piece
+
+Carousels / Stories / Presentations are **not** three empty tabs. They are **one component reused per
+collection**, and each one closes the loop: an approved idea goes in the top, a finished piece comes
+out the bottom, in the same screen.
+
+```tsx
+<Produce kind="carousel" />   <Produce kind="story" />   <Produce kind="presentation" />
+```
+
+**Top half — the ideas you can produce right now.** `GET /api/ideas?status=approved`, showing only
+ideas not yet produced in *this* format. Each row: the text, the hook, the pillar, and a single
+**Generate** button that POSTs `{ idea_id, type: kind }`. Nothing else needs to be on that button —
+the route pulls the whole record (reference 7d).
+
+**Bottom half — the pieces already produced in this collection.** `GET /api/gallery?type=<kind>` →
+`[{type, slug, cover, count, mtime}]`. Each card: the cover PNG (through `/api/asset`), the slug, the
+slide count and the date. Click opens the media viewer with all slides.
+
+**When the job finishes, this grid must refresh itself.** Poll `/api/generate`; the moment status
+leaves `running`, re-fetch **both** halves once (guard by `startedAt` so a reconnect doesn't loop).
+Without this the piece is on disk and the screen still says empty — which reads as "generation is
+broken" when it worked perfectly.
+
+### The three ways "it generated but nothing appeared" actually happens
+
+1. **The grid only lists pieces that have a cover.** If the agent wrote the HTML but the export step
+   never ran, the folder exists with no `png/` — and a cover-only filter renders nothing. **List the
+   piece anyway**, with a "built, not exported" badge and a **Re-export** button that runs
+   `node <collection>/<slug>/export.mjs`. A half-finished piece the user can see and fix beats an
+   empty screen they cannot explain.
+2. **The piece landed in the wrong collection.** The scaffold takes the collection as an argument, so
+   the generation prompt must pass the same `kind` the button was for. Verify the folder: a carousel
+   must be at `carousels/<slug>/`, never `content/carousels/` or the app directory.
+3. **The view was never wired to the filesystem at all** — it renders a static empty state because
+   nobody specified what it lists. This is the most common one; it is why this section exists.
+
+### The contract that ties it together
+
+The generation agent prints `DONE → <path>` as its last line (reference 4). Parse it from the job
+log to open the exact result. **If the job ends `done` without that line, treat it as suspect**: say
+so in the UI and re-scan the collection rather than reporting success — the run may have written the
+HTML and stopped short of the export.
+
+**Checkpoint:** approve an idea → press Generate on the Carousels view → when the job ends, the piece
+appears **in that same view without a manual reload**, its PNGs open in the viewer, and the idea's
+status is now `produced`. Repeat for one other format to prove the component is genuinely reused and
+not three divergent copies.
+
 ## Conventions that avoid real bugs (learned the hard way)
 - **Inline SVG icons**, not emoji, in the UI chrome. A small icon map + `<Icon n="..."/>`.
 - **Render every `.md`** (scripts, brand docs, calendar body preview) with `react-markdown` + `remark-gfm` (installed above). Don't hand-roll markdown.
@@ -104,7 +153,7 @@ route enforces it with a 409, but a button that 409s is a bug you shipped, not a
   The scout emits structured JSON against a contract (reference 7c); the ingest validates it.
 
 ## API routes (thin, filesystem-backed, all try/catch → empty default)
-`ideas` (**full CRUD over `ideas.json` via `ideas-core.mjs`** — GET with filters · POST validate+dedup+insert · PATCH partial merge · DELETE archives, `?permanent=1` really removes; **rejecting requires a `rejection_reason` or 400**), `strategy` (**GET-only**, serves `brand-kit.json` read-only — no POST/PATCH/DELETE by design), `gallery` (list pieces `{type,slug,cover,count,mtime}`), `piece` (all PNGs of one piece, with mtime), `asset` (serve a guarded PNG), `doc` (read a brand/metrics md), `scripts` (list + read `scripts/*.md`, slug-sanitized), `calendar` (GET/POST/PATCH/DELETE over `calendar.json`), `radar/health` (**reads `radar/health.tsv` → `{last_run_at,last_status,consecutive_failures,days_since_success,stale}`; the Radar and Home views render it as a banner** — reference 5a-bis), `generate` + `radar` (+ optional `edit`, `chat`) — the background-job pattern below.
+`ideas` (**full CRUD over `ideas.json` via `ideas-core.mjs`** — GET with filters · POST validate+dedup+insert · PATCH partial merge · DELETE archives, `?permanent=1` really removes; **rejecting requires a `rejection_reason` or 400**), `strategy` (**GET-only**, serves `brand-kit.json` read-only — no POST/PATCH/DELETE by design), `gallery` (list pieces `{type,slug,cover,count,mtime}`; **must accept `?type=carousel|story|presentation` so each Produce view can list only its own collection**, and must still list a piece whose `png/` is missing so a failed export is visible rather than silently absent), `piece` (all PNGs of one piece, with mtime), `asset` (serve a guarded PNG), `doc` (read a brand/metrics md), `scripts` (list + read `scripts/*.md`, slug-sanitized), `calendar` (GET/POST/PATCH/DELETE over `calendar.json`), `radar/health` (**reads `radar/health.tsv` → `{last_run_at,last_status,consecutive_failures,days_since_success,stale}`; the Radar and Home views render it as a banner** — reference 5a-bis), `generate` + `radar` (+ optional `edit`, `chat`) — the background-job pattern below.
 
 **Every AI route starts its prompt with the strategy block** (reference 7a), read fresh per request:
 ```ts

@@ -2,6 +2,10 @@
 
 The "never open Instagram/YouTube again" layer: every post with its real numbers, comments, inline playback, click-to-transcribe, and a competitor library you can study.
 
+> **Two deliverables, not one.** The grids are half the feature; the **post detail window** (6g-bis)
+> is the other half, and it is the piece that gets skipped. A grid you cannot click into is a
+> screenshot. Build both.
+
 Everything below was **verified against the live APIs**. The ⚠️ notes are traps that cost real debugging time — honor them or you'll ship the same bugs.
 
 ---
@@ -131,6 +135,45 @@ Run transcription as a **background job keyed by media id** (see reference 3) so
 - Photos/carousels have no video: render the image instead.
 
 ---
+
+## ⭐ 6g-bis. The post window is a REQUIRED deliverable — not a polish item
+
+**Every card in every grid — your own posts AND every competitor's — must open a detail window on
+click.** A grid of thumbnails you cannot open is not a study tool; it is a screenshot of one. This is
+the single most-missed piece of this whole layer, because the sections above describe the *data* and
+the section below describes how to *arrange* the window, so a builder can read both and never build
+the window itself.
+
+Build **one** component and use it for both surfaces. A competitor post and your own post differ only
+in which fields exist (see the table in 6d) — not in structure, and not in what a click does.
+
+**Click target:** the whole card, with a pointer cursor. Close on the ✕, on Escape, and on a
+backdrop click. Do not put the only close affordance in a corner.
+
+**Pinned at the top (always visible, never inside a tab):**
+- the **player** — YouTube `<iframe>`, Instagram `<video controls playsInline poster>`; a photo post
+  renders the image instead
+- the caption, the full publish date **including the year**, and a link out to the original
+- the 3–4 headline numbers, each compared to that account's own average (▲/▼ %)
+
+**Tabbed below** (reference 6h explains why tabs and not a stack):
+`الأداء` · `التفاعل` · `التعليقات (n)` · `التفريغ`
+
+**The transcript tab is where transcription is triggered.** It shows one of three states:
+1. never transcribed → a **«فرّغ الفيديو»** button (this is the *only* place transcription starts —
+   never automatically, see 6f)
+2. running → live progress from the background job, and it must survive closing the window
+3. done → the cleaned text, copyable, read from the cache
+
+Badge already-transcribed cards in the grid so you can see at a glance what you have studied.
+
+⚠️ **For competitors this window is the entire point of the feature.** The caption of a competitor
+Reel is often just the keyword gate («علّق بـ دليل») and says nothing about the video — so the
+hook, the structure and the argument only exist in the transcript. A competitor library without a
+transcript tab teaches you nothing you could not get from scrolling their profile.
+
+**Checkpoint:** click a card in *each* grid — your own and a competitor's. Both must open, both must
+play, and both must transcribe. If only one does, you built two components; go back and unify them.
 
 ## 6h. UI rules for this layer (each one is a bug we shipped and fixed)
 

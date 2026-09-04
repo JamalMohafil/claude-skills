@@ -23,10 +23,51 @@ Everything below is that rule, enforced in depth.
 | Tier | When | What you build |
 |---|---|---|
 | **Manual (default)** | No scheduler connector | A **Publish panel** per piece: the exported PNGs zipped for download, the caption in a copy-to-clipboard box, the one CTA, the hashtags, and a "mark as published" button that sets the calendar event to `published`. This is genuinely enough — it removes the retyping, which is the actual friction. |
-| **Connector** | The user has Buffer / Blotato / similar | The same panel, plus **draft + schedule** actions through the connector. Publish-now stays behind an explicit confirmation. |
+| **Connector** | The user has Buffer / Blotato / similar | The same panel, plus **draft + schedule** actions through the connector — **caption AND media together, verified by reading the draft back** (see below). Publish-now stays behind an explicit confirmation. |
 
 Do not build the connector tier speculatively. It is the only part of this OS that can touch the
 outside world, so it costs more to get wrong than it saves.
+
+### ⭐ A draft without its media is a failed draft, not a partial success
+
+**The single most common connector bug: the draft is created with the caption and none of the
+images.** The text field is easy and obvious; attaching media is a separate step that is easy to
+never notice is missing — until a caption-only draft is sitting in the queue looking ready to
+schedule.
+
+The reason is structural, and it bites every local-first OS: **the connector runs on someone else's
+servers.** It cannot read a local path, and it cannot fetch `http://localhost:3000/api/asset?...`.
+Handing it either produces a silent no-media draft, not an error.
+
+**So getting the media across is a required, explicit step. In order of preference:**
+
+1. **The connector's own upload endpoint.** Most have one — you POST the bytes and get back a media
+   id or a hosted URL, which you then attach to the draft. This is the correct path: no public
+   hosting of your own, no expiry.
+2. **A publicly reachable URL you control** (object storage, a tunnel). Only if the connector accepts
+   URLs and has no upload endpoint. A tunnel is fine for a personal setup — say so, since the draft
+   breaks when it closes.
+3. **Neither available → do NOT create the draft.** Fall back to the manual tier: hand over the zip
+   and the caption and say plainly that this connector can't take media programmatically. A
+   caption-only draft is worse than no draft, because it looks finished.
+
+**Slide order is part of correctness.** A carousel is an ordered sequence, so sort the exported files
+**numerically**, never lexicographically — `slide-10.png` sorts before `slide-2.png` as a string, and
+a carousel whose slides are shuffled is worse than one that failed outright:
+```js
+files.sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
+```
+Match the format too: a carousel posts as a multi-image post, a story as a single frame, a reel as
+video — sending a carousel's ten PNGs as ten separate posts is a different way to get this wrong.
+
+**⭐ Verify by reading the draft back.** After creating it, fetch it from the connector and assert the
+attached media count equals the slide count. If it doesn't match, report a **failure** with the
+counts — never "draft created". This is the whole lesson of this layer: the create call returning 200
+tells you the request was accepted, not that the post is complete.
+
+**Checkpoint:** create a draft from a real 8-slide carousel, then open the connector's UI. Eight
+images, in the right order, with the caption. If you see the caption alone, the media step is missing
+— that is the bug this section exists to prevent.
 
 ### The three enforcement layers
 

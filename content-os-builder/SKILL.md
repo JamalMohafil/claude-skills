@@ -77,7 +77,7 @@ After each stage tell the user what you did in one line.
 
 **Stage 6 — Radar + interactive calendar.** The scout prompt from the strategy renderer + the user's topics/sources/no-gos, emitting **structured JSON against the contract**; the on-demand `/api/radar` route; a scheduled daily run (cron/launchd/Task Scheduler) that ingests through the same code path as the app; and a **health check with a visible banner** — a scheduled job nobody watches fails silently, which is the failure mode that actually happens. Then the Notion-style month calendar backed by a JSON store, with rich items (title, type, platform, pillar, status, description, markdown body). Optionally wire read-only connectors (Notion import) if the user has them. → `references/5-radar-and-calendar.md`
 
-**Stage 7 — Publish + Growth (close the loop).** The publish panel (assets + caption + one CTA + a pre-publish checklist), the **three-layer no-auto-publish guarantee** and its verify script, then the Growth view — metrics, the weekly review, and hooks that graduate into the bank **with their real number**. Without this the OS produces forever and learns nothing. → `references/8-publish-and-growth.md`
+**Stage 7 — Publish + Growth (close the loop).** The publish panel (assets + caption + one CTA + a pre-publish checklist), the **three-layer no-auto-publish guarantee** and its verify script, **and — if a connector is wired — media that actually reaches the draft** (a connector runs on remote servers and cannot read a local path or `localhost`; a caption-only draft is a failure, not a partial success), then the Growth view — metrics, the weekly review, and hooks that graduate into the bank **with their real number**. Without this the OS produces forever and learns nothing. → `references/8-publish-and-growth.md`
 
 **Stage 8 — The Assistant (chat) surface** *(optional, but the highest-value view per line of code).* A chat pane that opens with the strategy block, so the user can ask for hooks or a rewrite without re-explaining their brand. Conversations are a real store (`chats.json`), each one a real route (`/assistant/<id>`), replies render as markdown with per-message direction, and the agent runs **with its tools disabled** so it answers instead of announcing it will go read files. → `references/9-assistant-chat.md`
 
@@ -85,7 +85,7 @@ After each stage tell the user what you did in one line.
 
 **Stage 10 — Verify + handoff.** Typecheck (`tsc --noEmit`) — and prefer typecheck over a full build if the user has a dev server running, since building wipes `.next`. **Never start a dev server to "verify"** — the user runs that. Run the **end-to-end walkthrough** below, then print how to run it (`<pm> dev` in `content-os/app`), where assets land, how the radar scheduler was installed and how to remove it, and remind them to **rotate any API key pasted into the chat**.
 
-### The Stage 10 walkthrough — do all eight, in order
+### The Stage 10 walkthrough — do all nine, in order
 
 Per-stage checkpoints catch broken parts. This catches a broken *loop*, which is a different failure.
 
@@ -97,7 +97,8 @@ Per-stage checkpoints catch broken parts. This catches a broken *loop*, which is
 5. The idea flipped to `produced`; the calendar event moves planned → published; the publish panel shows real assets
 6. If the assistant was built: a starter prompt from the empty state gets a reply (the path that breaks when navigation happens mid-turn), Arabic and English both render un-mangled, and a reload keeps the conversation
 7. If analytics was built: clicking a card — **your own AND a competitor's** — opens the detail window, plays, and transcribes
-8. `node tools/verify-publishing-safety.mjs` exits 0 — and exits 1 when you temporarily move a publish tool into `allow`
+8. If a publishing connector was wired: a draft made from an 8-slide carousel arrives with **8 images in the right order**, not the caption alone
+9. `node tools/verify-publishing-safety.mjs` exits 0 — and exits 1 when you temporarily move a publish tool into `allow`
 
 Report honestly which of the six passed. **Do not report the build as done with a failing step
 unmentioned** — say which one failed and what you tried.

@@ -53,7 +53,7 @@ content-os/
 `ROOT` in each route = the `content-os/` dir: `const ROOT = join(process.cwd(), "..")` (routes run from `app/`, so one `..`). Every route: `export const runtime = "nodejs"; export const dynamic = "force-dynamic";` and respond `no-store`.
 
 ## Views (sidebar, grouped) — include only the ones the user's formats/platforms need
-Home · **Strategy** (read-only render of `brand-kit.json` — no edit affordances anywhere) · **Ideas** (the review queue: filter by status/pillar/persona, approve, reject-with-a-reason, then Generate) · Radar · Search · Carousels · Stories · Presentations · **Scripts** (markdown, NOT images — its own reader; never route scripts to the image gallery) · Gallery · **Analytics** + **Inspiration** (only if API credentials were given → reference 6) · Calendar · **Growth** (two markdown tabs: metrics + the hook bank → reference 8b) · Brand · (optional) Assistant/Terminal/Settings.
+Home · **Strategy** (read-only render of `brand-kit.json` — no edit affordances anywhere) · **Ideas** (the review queue: filter by status/pillar/persona, approve, reject-with-a-reason, then Generate) · Radar · Search · Carousels · Stories · Presentations · **Scripts** (markdown, NOT images — its own reader; never route scripts to the image gallery) · Gallery · **Analytics** + **Inspiration** (only if API credentials were given → reference 6) · Calendar · **Growth** (two markdown tabs: metrics + the hook bank → reference 8c) · Brand · (optional) Assistant/Terminal/Settings.
 
 **Ideas is the centre of gravity, not a list.** It is where a human decides what gets made, so it
 needs: status filter chips with counts, the idea's hook/angle/proof visible without opening anything,

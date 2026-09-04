@@ -31,7 +31,7 @@ It **interviews the user first** (brand colors, visual identity, platforms, voic
 | `references/3-dashboard-app.md` | The dashboard app blueprint + the **background-job pattern** (survives reload, Stop, reconnect). |
 | `references/4-builders-and-export.md` | Per-format builders + the Playwright HTML→PNG export engine + the scaffold script. |
 | `references/5-radar-and-calendar.md` | The trend-scout (on-demand + scheduled), its **health check**, and the interactive Notion-style calendar. |
-| `references/8-publish-and-growth.md` | The publish panel + the no-auto-publish guarantee, and the Growth loop that turns results back into next week's ideas. |
+| `references/8-publish-and-growth.md` | The publish panel + the no-auto-publish guarantee · **connector media** (why a draft arrives with the caption and no images, and the hosting/tunnel work that fixes it) · the Growth loop that turns results back into next week's ideas. |
 | `references/9-assistant-chat.md` | The brand-aware chat: a conversation store, the SSE streaming contract, markdown + per-message direction, and the routing traps that make a send silently do nothing. |
 | `references/6-analytics-and-inspiration.md` | Real Instagram/YouTube analytics, competitor study, inline playback, click-to-transcribe — with every verified API quirk and the traps that break each one. |
 

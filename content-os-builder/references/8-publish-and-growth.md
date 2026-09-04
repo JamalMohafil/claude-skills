@@ -40,10 +40,19 @@ servers.** It cannot read a local path, and it cannot fetch `http://localhost:30
 Handing it either produces a silent no-media draft, not an error.
 
 **Publishing goes through the connector's MCP tools, driven by the agent — not from a route in the
-dashboard.** That is already the rule (the dashboard has no publish endpoint), and it is also where
-the media problem gets solved, because the upload capability lives in the MCP.
+dashboard.** That is already the rule: the dashboard has no publish endpoint.
 
-**⭐ It is a THREE-call sequence, and the create call looks self-sufficient — which is the trap.**
+⚠️ **But an MCP is a wrapper over the same API — it does not add capabilities the API lacks.** Read
+its tool schema before assuming otherwise. Connectors split into two kinds, and which one you have
+decides the entire media design:
+
+| | |
+|---|---|
+| **Has an upload tool** (e.g. Blotato) | Three-call sequence below. Nothing to host, nothing to expire. |
+| **Has none** (e.g. Buffer) | It takes **public URLs only**, so you must host the files yourself → **§8b**, which is a much bigger job than it looks. |
+
+**⭐ Where an upload tool exists, it is a THREE-call sequence, and the create call looks
+self-sufficient — which is the trap.**
 `create_post` takes `text` and `mediaUrls` and returns 200 on its own, so an agent calls it alone and
 ships a caption with no images. Real example (Blotato; Buffer and others follow the same shape):
 
@@ -61,11 +70,10 @@ That tool's own description says it outright: *"The upload step is REQUIRED befo
 be used"* and *"Do NOT try to send the file directly to create_post"*. **Read the connector's tool
 descriptions before wiring it** — the sequence is documented there and nowhere else.
 
-**If the connector has no upload tool:** use a publicly reachable URL you control (object storage, a
-tunnel — say so, since the draft breaks when the tunnel closes). **If there is neither, do NOT create
-the draft.** Fall back to the manual tier, hand over the zip and the caption, and say plainly that
-this connector cannot take media programmatically. A caption-only draft is worse than no draft,
-because it looks finished.
+**If the connector has no upload tool**, you are on the public-URL path — read **§8b in full** before
+writing any of it. **And if you can neither upload nor host, do NOT create the draft.** Fall back to
+the manual tier, hand over the zip and the caption, and say plainly that this connector cannot take
+media programmatically. A caption-only draft is worse than no draft, because it looks finished.
 
 **Slide order is part of correctness.** A carousel is an ordered sequence, so sort the exported files
 **numerically**, never lexicographically — `slide-10.png` sorts before `slide-2.png` as a string, and
@@ -131,7 +139,135 @@ Assemble from the piece + its idea record — no new AI call needed:
 
 ---
 
-## 8b. Growth — the learning loop
+## 8b. Connector media — the public-URL problem (Buffer, and anything like it)
+
+The connector tier looks done when a draft appears in the dashboard's target app. It isn't. **Text
+posts work on the first try and media does not**, and the failure is invisible from the API side —
+which is exactly why it costs a debugging session.
+
+### The three facts that shape the whole design
+
+1. **Buffer has no upload endpoint.** Documented, not inferred (`developers.buffer.com/guides/hosting-media.html`).
+   Assets are `[{ image: { url } }]` and `url` must be a **public, unauthenticated https** file.
+   Probing `upload.buffer.com`, `/1/media/upload.json` and `/upload` all return
+   `Unsupported Content-Type` — the endpoint is GraphQL-only.
+2. **The MCP does not change this.** The Buffer MCP's `create_post` takes the same
+   `assets: [{ image: { url } }]` with the note *"url is a direct file URL"* — no file, path or
+   base64 parameter. It is a wrapper over the same API. **Check the MCP's schema before assuming it
+   adds a capability the REST/GraphQL API lacks** — usually it does not.
+3. **The URL is stored verbatim and re-fetched AT PUBLISH TIME.** Verified: the created asset's
+   `source` came back as our own tunnel URL, not a Buffer CDN copy. So a tunnel that dies between
+   drafting and publishing produces a post with no images. Say this in the UI; it is not a footnote.
+
+### ⭐ The ngrok interstitial trap — the bug that eats an afternoon
+
+Symptom: the draft is created successfully, the API returns the correct image dimensions
+(`2160×2700`), `attached: 9` — **and every thumbnail renders broken in the connector's web UI.**
+Everything server-side says success, so you go looking in the wrong layer.
+
+Cause: **ngrok's free tier serves an HTML interstitial to browser-shaped requests.** The connector's
+*backend* fetches with a plain user-agent and gets the file. The connector's *UI* loads assets in
+`<img>` tags and gets the warning page.
+
+The diagnostic — two curls at the same URL, and the difference is the whole answer:
+
+```bash
+# what the connector's SERVER sends
+curl -sI "$URL/slide-01.png"
+#   200  image/png       1426829 bytes   OK
+
+# what the connector's UI sends
+curl -s "$URL/slide-01.png" \
+  -H 'User-Agent: Mozilla/5.0 ... Chrome/140.0 Safari/537.36' \
+  -H 'Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+#   200  text/html       2803 bytes      BROKEN  <!DOCTYPE html> ...
+```
+
+`ngrok-skip-browser-warning: true` bypasses it — **and is useless here, because an `<img>` tag
+cannot send custom headers.**
+
+**Fix: use a Cloudflare quick tunnel, not ngrok.**
+```bash
+cloudflared tunnel --url http://127.0.0.1:<port> --no-autoupdate
+```
+No interstitial, no account, free. Same browser-shaped request returns a real PNG (check the magic
+bytes `\x89PNG\r\n\x1a\n`, not just the status code — a 200 proves nothing here).
+
+> **Generalise this.** Whenever a third-party UI shows broken media while its API reports success,
+> fetch the same URL twice — once plain, once with a browser `User-Agent` + `Accept: image/*` — and
+> compare `content_type` and size. Tunnels, CDNs and hotlink protection all discriminate on exactly
+> those headers, and none of them tell you they are doing it.
+
+### ⭐ Never tunnel the dashboard — tunnel a separate read-only file server
+
+The obvious move is to expose the dev server, since it already serves the images. **Do not.**
+`/api/generate` and `/api/radar` spawn the agent CLI with `--dangerously-skip-permissions`, and their
+guard only trips on `NODE_ENV === "production"`. A public tunnel to the dev server lets anyone with
+the URL run an agent on the user's machine.
+
+Ship `tools/media-server.mjs` instead: a zero-dependency server that serves **only** `*.png` under
+`<collection>/<slug>/png/`. Path shape validated segment by segment, realpath containment, no
+directory listing, `GET`/`HEAD` only. Prove the blast radius rather than asserting it:
+
+```
+/carousels/<slug>/png/slide-01.png  200      <- the only thing reachable
+/brand-kit.json                     404
+/app/.env.local                     404
+/api/generate                       404
+/carousels/<slug>/<slug>.html       404
+POST anything                       405
+```
+
+### Resolving the public base (never hard-code it)
+
+Quick-tunnel URLs change on every restart, so hard-coding one is a trap. Resolve in this order:
+
+1. `MEDIA_PUBLIC_BASE` — permanent hosting (Vercel Blob, R2, any public bucket). Always wins.
+2. `.media-base` — written by `tools/start-media-tunnel.sh` (cloudflared).
+3. A running ngrok session — **still works, but return a `note` warning that its interstitial will
+   render images broken in the connector UI.** A degraded path that explains itself beats one that
+   silently reproduces the original bug.
+
+Refuse `localhost` / `127.0.0.1` URLs outright in the client — otherwise you create a draft that
+publishes with no images and nothing surfaces the cause.
+
+### Draft-only by construction, and checkable
+
+The connector is the only part of the OS that touches the outside world, so the safety has to live in
+the code shape, not in the prompt:
+
+- `saveToDraft: true`, `mode: "addToQueue"` and `schedulingType` are **hard-coded inside the client**,
+  never taken from the caller. The string `shareNow` appears nowhere in the file.
+- The route **refuses** a caller-supplied `mode` / `dueAt` / `schedulingType` with **403 and a visible
+  reason** — not a silent strip.
+- After creation, assert the returned `status === "draft"` and that `assets.length` matches what you
+  sent; throw loudly otherwise. A zero-image draft that reports success is the failure mode here.
+- Extend `verify-publishing-safety.mjs` with these as assertions, then **break each one on purpose and
+  confirm it exits 1**. A check that has never fired is not a check.
+
+### Schema gotchas worth writing down (Buffer, 2026)
+
+| Gotcha | Reality |
+|---|---|
+| Endpoint | `https://api.buffer.com/` — `graph.buffer.com` 401s; legacy `api.bufferapp.com` rejects public tokens (retires 2027-02-01) |
+| `createPost` return | A **union** (`PostActionSuccess \| NotFoundError \| ...`). Spread every error arm or a refusal decodes as an empty success |
+| Required inputs | `mode` **and** `schedulingType` are non-null even for a draft |
+| Instagram | `metadata.instagram.type` **and** `shouldShareToFeed` both required |
+| Instagram types | `post \| story \| reel` only — **`carousel` is rejected**; a carousel *is* a `post` with several images (cap 10) |
+| Reading assets back | `ImageAsset` exposes `source`/`thumbnail`, **not** `url`/`thumbnailUrl` |
+
+### Checkpoint
+
+- Create a draft with images, then **open it in the connector's web UI** — do not trust `attached: N`.
+  This is the only step that catches the interstitial class of bug.
+- `curl` the asset URL with a browser `User-Agent` and confirm `content_type: image/png` **and** PNG
+  magic bytes.
+- Kill the tunnel, then create a draft: it must refuse with an actionable message, not attach zero
+  images silently.
+
+---
+
+## 8c. Growth — the learning loop
 
 Two files and one view. That is the whole thing.
 

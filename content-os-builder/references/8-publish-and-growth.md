@@ -39,17 +39,33 @@ The reason is structural, and it bites every local-first OS: **the connector run
 servers.** It cannot read a local path, and it cannot fetch `http://localhost:3000/api/asset?...`.
 Handing it either produces a silent no-media draft, not an error.
 
-**So getting the media across is a required, explicit step. In order of preference:**
+**Publishing goes through the connector's MCP tools, driven by the agent — not from a route in the
+dashboard.** That is already the rule (the dashboard has no publish endpoint), and it is also where
+the media problem gets solved, because the upload capability lives in the MCP.
 
-1. **The connector's own upload endpoint.** Most have one — you POST the bytes and get back a media
-   id or a hosted URL, which you then attach to the draft. This is the correct path: no public
-   hosting of your own, no expiry.
-2. **A publicly reachable URL you control** (object storage, a tunnel). Only if the connector accepts
-   URLs and has no upload endpoint. A tunnel is fine for a personal setup — say so, since the draft
-   breaks when it closes.
-3. **Neither available → do NOT create the draft.** Fall back to the manual tier: hand over the zip
-   and the caption and say plainly that this connector can't take media programmatically. A
-   caption-only draft is worse than no draft, because it looks finished.
+**⭐ It is a THREE-call sequence, and the create call looks self-sufficient — which is the trap.**
+`create_post` takes `text` and `mediaUrls` and returns 200 on its own, so an agent calls it alone and
+ships a caption with no images. Real example (Blotato; Buffer and others follow the same shape):
+
+```
+1. <connector>_create_presigned_upload_url({ filename: "slide-01.png" })
+       → { presignedUrl, publicUrl }
+2. curl -X PUT "<presignedUrl>" --data-binary "@<abs path to slide-01.png>"
+       ← THE STEP EVERYONE SKIPS. Raw bytes, PUT, not JSON and not multipart.
+3. <connector>_create_post({ …, mediaUrls: [publicUrl, publicUrl, …] })
+```
+Repeat 1–2 per slide, collect the `publicUrl`s **in slide order**, then make one create call with all
+of them — for Instagram and LinkedIn a carousel is one post with many URLs, not many posts.
+
+That tool's own description says it outright: *"The upload step is REQUIRED before the local file can
+be used"* and *"Do NOT try to send the file directly to create_post"*. **Read the connector's tool
+descriptions before wiring it** — the sequence is documented there and nowhere else.
+
+**If the connector has no upload tool:** use a publicly reachable URL you control (object storage, a
+tunnel — say so, since the draft breaks when the tunnel closes). **If there is neither, do NOT create
+the draft.** Fall back to the manual tier, hand over the zip and the caption, and say plainly that
+this connector cannot take media programmatically. A caption-only draft is worse than no draft,
+because it looks finished.
 
 **Slide order is part of correctness.** A carousel is an ordered sequence, so sort the exported files
 **numerically**, never lexicographically — `slide-10.png` sorts before `slide-2.png` as a string, and

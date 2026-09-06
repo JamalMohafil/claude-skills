@@ -116,7 +116,69 @@ confirm three things: the script exits **before** spending a scan, `health.tsv` 
 and the banner appears in the UI. Then restore the file and confirm the banner clears. A health
 check you have never seen fire is not a health check.
 
-## 5b. Interactive calendar — Notion-style, JSON-backed
+## ⭐ 5b. The Radar view — cards, not a wall of text
+
+The scout emits a **structured** run: a coverage note, signals with four fields each, and ideas with
+twelve. If the view is not specified, all of that gets stringified into one long paragraph inside one
+big box — technically "showing the data", and useless. You cannot scan it, compare ideas, or see at a
+glance which one is urgent.
+
+> **The rule, and it is general:** a record with fields renders as **fields**. Chips for taxonomy,
+> badges for state, a pull-quote for the hook, a link for the source. Never dump a record into prose.
+> If you catch yourself writing `JSON.stringify` or joining fields with ` — ` into a paragraph, stop.
+
+### The layout, top to bottom
+
+**1. Header strip.** Last run time, a status pill (`ok` green / `degraded` amber / `fail` red), the
+`coverage_note` from the run — one honest line about what the scout could and could not reach — and
+a **Scan now** button that turns into **Stop** while running (the background-job pattern, reference 3).
+
+**2. The health banner** when `consecutive_failures >= 2` or `stale` (§5a-bis). Above everything.
+
+**3. The ingest result of the last run**, as a strip of counts, not a sentence:
+`3 new` · `4 already known` · `1 rejected` — with the rejected ones expandable to show *why* each was
+dropped. Rejections are the most useful thing the radar tells you and the easiest to hide.
+
+**4. Signals** — a compact grid, grouped by `bucket`. Each card: the `headline` in bold, the
+`why_it_matters` line underneath, and the source domain as a link. These are context, not ideas —
+keep them visually lighter than the idea cards so the eye separates them without reading.
+
+**5. Ideas — one card each.** This is the view. Each card shows the record *as fields*:
+
+| Field | How it renders |
+|---|---|
+| `text` | the card title |
+| `suggested_hook` | a pull-quote — visually distinct, it is the thing being judged |
+| `timeliness.level` | a badge: `urgent` red · `timely` amber · `evergreen` neutral, with `expires_at` when set |
+| `pillar_id` · `funnel_stage` | chips, colored by pillar |
+| `persona_ids` · `brand_associations` | small chips — associations are the intentionality gate, so they must be *visible*, not buried |
+| `proof_assets` | a short list; if empty, say "build-in-public" rather than showing nothing |
+| `suggested_cta_id` | the offer name, or an explicit **"no CTA"** — never blank, which reads as an omission |
+| `angle` · `rationale` | collapsed by default, expandable |
+| `source_url` | a favicon + domain link out |
+| `seen_count > 1` | a "seen N×" badge — a story the world keeps repeating is signal |
+
+Each card carries the same **Approve / Reject** actions as the Ideas view (reject requires a reason),
+so the radar is a place you can act, not just read.
+
+**6. Run history.** List previous runs from `radar/runs/` (newest first) — click one to view it. **And
+list the failures from `radar/failed/` in the same place**, with their reason. A failure directory
+nobody opens is how the reference implementation lost 21 nights (§5a-bis); putting failures on the
+same screen as successes is what makes them impossible to miss.
+
+**Route:** `GET /api/radar/runs` → `[{run_id, scanned_at, status, counts, coverage_note}]`, and
+`?id=` for one full run. Same try/catch → empty default as every other read route.
+
+**Empty state:** never a blank pane. "No scan yet — press Scan now" plus the next scheduled run time.
+
+### Checkpoint
+
+Open the Radar view after a real scan. You must be able to answer **without reading a paragraph**:
+which idea is urgent, which pillar each belongs to, which reinforces which association, which has no
+CTA by design, and which were rejected and why. If you have to read prose to answer any of those, the
+view is a text dump and the fields need to become chips.
+
+## 5c. Interactive calendar — Notion-style, JSON-backed
 
 A real month-grid calendar (add / move / edit / delete), not a static markdown doc. Store: `content-os/calendar.json` = `{ "events": [ {id,date,title,pillar,format,platform,status,description,content,source} ] }`.
 
@@ -136,7 +198,7 @@ Generate ids stably (a timestamp+random, or an imported source's own id so re-im
 - **Content** — a **markdown editor with write/preview toggle** + a small toolbar (H / bold / list / quote / code) that inserts markdown at the cursor; preview renders the markdown. This is the "content like Notion" piece.
 Statuses (map to the brand's workflow): planned → drafted → produced → scheduled → published, each with a color.
 
-## 5c. Optional connectors (only if the user has them)
+## 5d. Optional connectors (only if the user has them)
 - **Notion import** — if the user keeps a content calendar in Notion: use the Notion connector to read the database (search the data source, fetch each page for its Date + properties + body since query APIs may be plan-gated), map to the calendar schema, and write `calendar.json`. Use the Notion page id as the event id so re-imports update instead of duplicating. One-way (Notion → OS) unless the user asks for write-back.
 - **Buffer / Blotato scheduling** — read-only by default (list channels, pull post analytics into a Growth view). Any actual publish/schedule action must require explicit confirmation — never post to a live account automatically.
 

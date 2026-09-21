@@ -1,6 +1,6 @@
 ---
 name: agent-starter-kit
-description: One-command setup for a new AI coding agent. Installs the essential starter skills (find-skills, agent-browser, karpathy-guidelines, ui-ux-pro-max, caveman, arabic-design) across 70+ agents, plus the core Claude Code plugins/MCPs (frontend-design, superpowers, code-review, playwright, github, claude-md-management). Use when the user is setting up a new project or a fresh agent and asks for "the skills/MCPs I should start with", a "starter pack", or "set up my agent".
+description: One-command setup for a new AI coding agent. Installs the essential starter skills (find-skills, agent-browser, karpathy-guidelines, ui-ux-pro-max, caveman, arabic-design, design-taste-frontend, remotion-best-practices) across 70+ agents, plus the core Claude Code plugins/MCPs (frontend-design, superpowers, code-review, playwright, github, claude-md-management). Use when the user is setting up a new project or a fresh agent and asks for "the skills/MCPs I should start with", a "starter pack", or "set up my agent".
 ---
 
 # Agent Starter Kit
@@ -22,6 +22,8 @@ included), review its own code, and automate the browser + GitHub.
 | `ui-ux-pro-max` | Design-system intelligence — styles, color palettes, font pairings |
 | `caveman` | Blunt, no-fluff answers when you want signal over politeness |
 | `arabic-design` | Clean Arabic in AI-generated designs (fixes the letter-spacing/RTL traps) |
+| `design-taste-frontend` | Design taste for landing pages, portfolios and redesigns — stops templated, generic UI ([tasteskill](https://github.com/Leonxlnx/taste-skill)) |
+| `remotion-best-practices` | Video in React with Remotion — the **official** skill, a router carrying 11 nested references (create · markup · captions · render · studio · maps · …) |
 
 **Tier 2 — Plugins / MCPs (Claude Code only):**
 | Plugin / MCP | What it gives Claude Code |
@@ -58,6 +60,15 @@ fallback lines the script printed. In Claude Code, remind the user to restart (o
 ## Honest scope note
 
 - **Tier 1 skills are genuinely cross-agent** — `npx skills` targets 70+ agents.
+- **`design-taste-frontend` is scoped by its own authors** to landing pages, portfolios
+  and redesigns — *not* dashboards, data tables, or multi-step product UI. It is also large
+  (~87KB), so it costs real context when it fires. If a project's UI is a dashboard, or it
+  already has a locked visual system, leave it out of the loop rather than letting it argue
+  with the system you already decided on.
+- **`remotion-best-practices` is one entry, not twelve.** The official repo ships 12 skills,
+  but the router installs with all 11 others nested inside it and every relative link
+  resolving (verified). Installing the single router keeps the agent's skill list clean and
+  loses nothing — do not "fix" this by adding the siblings as separate entries.
 - **Tier 2 is Claude Code only.** Codex/Cursor have no "plugin" equivalent. Their two
   *MCP* items (`playwright`, `github`) can still be added to Codex/Cursor through that
   agent's own MCP config — the script says so when you pass a non-Claude `--agent`.

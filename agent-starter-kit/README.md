@@ -35,7 +35,8 @@ install automatically prints the exact manual command to finish it.
 ## What it installs
 
 **Tier 1 — Skills (work on 70+ agents via `npx skills`):**
-find-skills · agent-browser · karpathy-guidelines · ui-ux-pro-max · caveman · **arabic-design** (ours)
+find-skills · agent-browser · karpathy-guidelines · ui-ux-pro-max · caveman · **arabic-design** (ours) ·
+design-taste-frontend · remotion-best-practices
 
 **Tier 2 — Plugins / MCPs (Claude Code only):**
 frontend-design · superpowers · code-review · playwright (MCP) · github (MCP) · claude-md-management
@@ -43,6 +44,12 @@ frontend-design · superpowers · code-review · playwright (MCP) · github (MCP
 ## Honest scope
 
 - **Tier 1 is genuinely cross-agent** — `npx skills` supports 70+ agents.
+- **`design-taste-frontend`** is scoped by its authors to landing pages, portfolios and redesigns —
+  not dashboards or data-heavy product UI — and it is large (~87KB of context when it fires). Skip it
+  on projects that already have a locked visual system.
+- **`remotion-best-practices`** is installed as a single skill on purpose: the official repo has 12,
+  but the router ships with the other 11 nested inside it and all relative links intact, so one entry
+  gives the whole thing without cluttering the agent's skill list.
 - **Tier 2 is Claude Code only.** Codex/Cursor have no "plugin" concept. But two of them
   (`playwright`, `github`) are MCP servers, so you can still add them to Codex/Cursor through that
   agent's own MCP config — the installer tells you so when you pass a non-Claude `--agent`.

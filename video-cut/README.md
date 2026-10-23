@@ -1,10 +1,12 @@
 <p align="center">
-  <img src="static/video-use-banner.png" alt="video-use" width="100%">
+  <img src="static/video-use-banner.png" alt="video-cut" width="100%">
 </p>
 
-# video-use
+# video-cut
 
-Introducing **video-use** — edit videos with Claude Code. 100% open source.
+**Edit videos by chatting with your agent.** 100% open source.
+
+> Based on [video-use](https://github.com/browser-use/video-use) by [Browser Use](https://browser-use.com) (MIT license), packaged here as `video-cut` in [JamalMohafil/claude-skills](https://github.com/JamalMohafil/claude-skills).
 
 Drop raw footage in a folder, chat with Claude Code, get `final.mp4` back. Works for any content — talking heads, montages, tutorials, travel, interviews — without presets or menus.
 
@@ -25,7 +27,7 @@ Try video-use in [Browser Use Cloud](https://cloud.browser-use.com/v4?utm_campai
 Paste into Claude Code, Codex, Hermes, Openclaw, or any agent with shell access:
 
 ```text
-Set up https://github.com/browser-use/video-use for me.
+Set up the video-cut skill from https://github.com/JamalMohafil/claude-skills/tree/main/video-cut for me.
 
 Read install.md first to install this repo, wire up ffmpeg, register the skill with whichever agent you're running under, and set up the ElevenLabs API key — ask me to paste it when you need it. Then read SKILL.md for daily usage, and always read helpers/ because that's where the editing scripts live. After install, don't transcribe anything on your own — just tell me it's ready and wait for me to drop footage into a folder.
 ```
@@ -53,12 +55,12 @@ If you'd rather do it by hand:
 
 ```bash
 # 1. Clone and symlink into your agent's skills directory
-git clone https://github.com/browser-use/video-use ~/Developer/video-use
-ln -sfn ~/Developer/video-use ~/.claude/skills/video-use        # Claude Code
-# ln -sfn ~/Developer/video-use ~/.codex/skills/video-use       # Codex
+git clone https://github.com/JamalMohafil/claude-skills ~/Developer/claude-skills
+ln -sfn ~/Developer/claude-skills/video-cut ~/.claude/skills/video-cut        # Claude Code
+# ln -sfn ~/Developer/claude-skills/video-cut ~/.codex/skills/video-cut       # Codex
 
 # 2. Install deps
-cd ~/Developer/video-use
+cd ~/Developer/claude-skills/video-cut
 uv sync                         # or: pip install -e .
 brew install ffmpeg             # required
 brew install yt-dlp             # optional, for downloading online sources

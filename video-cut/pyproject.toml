@@ -1,5 +1,5 @@
 [project]
-name = "video-use"
+name = "video-cut"
 version = "0.1.0"
 description = "Conversation-driven video editor skill for Claude Code"
 license = { file = "LICENSE" }

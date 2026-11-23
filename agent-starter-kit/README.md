@@ -35,7 +35,7 @@ install automatically prints the exact manual command to finish it.
 ## What it installs
 
 **Tier 1 — Skills (work on 70+ agents via `npx skills`):**
-find-skills · agent-browser · karpathy-guidelines · ui-ux-pro-max · caveman · **arabic-design** (ours) ·
+find-skills · agent-browser · karpathy-guidelines · ui-ux-pro-max · caveman · **arabic-design** (ours) · **ship-complete** (ours) ·
 design-taste-frontend · remotion-best-practices
 
 **Tier 2 — Plugins / MCPs (Claude Code only):**

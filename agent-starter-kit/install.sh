@@ -48,6 +48,7 @@ SKILLS=(
   "nextlevelbuilder/ui-ux-pro-max-skill|ui-ux-pro-max" # design-system intelligence (styles/palettes)
   "juliusbrussee/caveman|caveman"                      # blunt, no-fluff responses
   "JamalMohafil/claude-skills|arabic-design"           # clean Arabic in AI-generated designs (ours)
+  "JamalMohafil/claude-skills|ship-complete"           # finish a product completely: proof-gated "done", verifier, bug ledger (ours)
   "Leonxlnx/taste-skill|design-taste-frontend"         # anti-slop frontend taste (landing/portfolio/redesign)
   "remotion-dev/skills|remotion-best-practices"        # official Remotion: video in React (router + 11 nested refs)
 )

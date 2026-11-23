@@ -1,6 +1,6 @@
 ---
 name: agent-starter-kit
-description: One-command setup for a new AI coding agent. Installs the essential starter skills (find-skills, agent-browser, karpathy-guidelines, ui-ux-pro-max, caveman, arabic-design, design-taste-frontend, remotion-best-practices) across 70+ agents, plus the core Claude Code plugins/MCPs (frontend-design, superpowers, code-review, playwright, github, claude-md-management). Use when the user is setting up a new project or a fresh agent and asks for "the skills/MCPs I should start with", a "starter pack", or "set up my agent".
+description: One-command setup for a new AI coding agent. Installs the essential starter skills (find-skills, agent-browser, karpathy-guidelines, ui-ux-pro-max, caveman, arabic-design, ship-complete, design-taste-frontend, remotion-best-practices) across 70+ agents, plus the core Claude Code plugins/MCPs (frontend-design, superpowers, code-review, playwright, github, claude-md-management). Use when the user is setting up a new project or a fresh agent and asks for "the skills/MCPs I should start with", a "starter pack", or "set up my agent".
 ---
 
 # Agent Starter Kit
@@ -22,6 +22,7 @@ included), review its own code, and automate the browser + GitHub.
 | `ui-ux-pro-max` | Design-system intelligence — styles, color palettes, font pairings |
 | `caveman` | Blunt, no-fluff answers when you want signal over politeness |
 | `arabic-design` | Clean Arabic in AI-generated designs (fixes the letter-spacing/RTL traps) |
+| `ship-complete` | Makes the agent finish a product completely: agree "done when" first, prove every slice on the real stack, a skeptical verifier, a hook that rejects "done" without proof, every bug turned into a check |
 | `design-taste-frontend` | Design taste for landing pages, portfolios and redesigns — stops templated, generic UI ([tasteskill](https://github.com/Leonxlnx/taste-skill)) |
 | `remotion-best-practices` | Video in React with Remotion — the **official** skill, a router carrying 11 nested references (create · markup · captions · render · studio · maps · …) |
 

@@ -11,7 +11,7 @@ failure its owner found himself. There were 89:
   only agreeing on "done" up front does, plus picking from real samples before anything is built.
 - **35%** UI bugs, "claimed done" work and integrations that were never connected. Browser tests
   on the real deployed app catch these. The project had more than 12,000 green unit tests the
-  whole time.
+  whole time.ig
 - **19%** wrong AI answers. Evals built from real conversations catch these.
 
 **The fix:** instructions alone don't work (agents skip rules, and long rule files make it

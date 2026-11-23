@@ -23,15 +23,15 @@ Proof is something the human could re-check:
 
 Rules that keep proof honest:
 
-- **Run it yourself and read the result.** An agent's "tests pass" is a report, not evidence.
-  Write long output to a log file and read back the exit code, the summary and the tail of any
-  failure. `proof_pack.py run` does this for you.
+- **Re-run it and read it with your own eyes.** "All green" from another agent is hearsay until
+  you see it. Send long output to a log, then check the exit status, the totals line and the last
+  lines of each failure. `proof_pack.py run` does this for you.
 - **Prove the committed HEAD, not the dirty tree.** In a shared working tree, other agents'
   half-done edits can make your check pass or fail. Before saying a commit works, run the checks
   in a clean worktree of that commit (see `multi-agent.md`).
-- **Passing locally is not passing CI.** A check can fail only there: another runtime, a
-  missing variable, a step the local command skips. Wait for CI on the pushed commit.
-- **No tests, no "safe".** In code without tests, don't call a change safe or equivalent. Say
+- **Green on your machine is not green on the server.** The pipeline can differ: another runtime,
+  a missing variable, a step your local command skips. Wait for the pipeline on the pushed commit.
+- **No tests, no "safe".** Where nothing tests the code, never promise a change is harmless or behaves the same. Say
   what you actually verified.
 - **Never edit, skip or delete a test to make it pass.** If a test is wrong, say so with
   evidence and let the human decide.

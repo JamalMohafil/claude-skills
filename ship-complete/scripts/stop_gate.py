@@ -488,7 +488,7 @@ def failure_reason(failures, warnings):
 def claim_reason(claim):
     return (
         "ship-complete gate: your last message claims the work is finished (\"%s\") but shows no "
-        "proof. Before you stop, add the evidence: the command you ran and its real output in a code "
+        "proof. Before you stop, add the evidence: the exact command plus the output it printed in a code "
         "block, a screenshot path, or the proof pack in docs/ship/proof/. If you did not verify "
         "something, say \"not verified\" and why. A bare \"tests pass\" or \"done\" is a claim, not "
         "proof." % claim)

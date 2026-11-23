@@ -43,8 +43,8 @@ reasons and numbers behind every step are in
 [references/evidence.md](references/evidence.md); the real failures behind it are in
 [references/failure-catalogue.md](references/failure-catalogue.md).
 
-This skill names actions ("dispatch a subagent", "open the browser"), not tools. Use your
-platform's equivalents. Outside Claude Code, `${CLAUDE_SKILL_DIR}` means the folder this file
+Steps here describe what to do ("send a fresh agent", "open the app in a browser"), whatever your
+agent calls the tool for it. Outside Claude Code, `${CLAUDE_SKILL_DIR}` means the folder this file
 is in; see [references/other-agents.md](references/other-agents.md).
 
 **Scope.** A whole product: one product brief (the jobs list, the overall look), then Steps 4–7

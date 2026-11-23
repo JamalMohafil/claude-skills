@@ -57,8 +57,8 @@ missing=$(comm -23 <(printf '%s\n' "$used") <(printf '%s\n' "$declared"))
 [ -z "$missing" ] || { echo "Env vars read but not declared in the build:"; echo "$missing"; exit 1; }
 ```
 
-(`<( )` needs bash.) Test the check against a file with a planted undeclared variable: a broken
-pattern looks exactly like a clean repo.
+(`<( )` needs bash.) Prove the check works by planting one undeclared variable and watching it fail: a check that
+never fails can't be told apart from one that matches nothing.
 
 ## 4. Live journeys after every deploy and every night
 

@@ -32,10 +32,10 @@ Interview question bank (ask only what is still open):
 -->
 
 ## Problem
-<!-- What is wrong today, for whom, and why it matters. In the user's words. -->
+<!-- The problem as the user tells it: who hits it, when, and what it costs them. -->
 
 ## Outcome
-<!-- What "better" looks like, as an outcome, not an implementation. -->
+<!-- The result the user will notice when this works. Describe the effect, never the code. -->
 
 ## Done when
 <!--
@@ -89,4 +89,4 @@ live, and why.
 <!-- Genuinely unresolved. Leave them open rather than guessing. -->
 
 ## Affected users and systems
-<!-- Who and what this touches: screens, services, data, integrations, other teams. -->
+<!-- Blast radius: the screens, services, data, integrations and people this change reaches. -->

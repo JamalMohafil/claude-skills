@@ -11,7 +11,7 @@ failed. Add `--all` to run every package's checks.
 Before you say "done", "fixed" or "ready":
 
 1. Run the gate and paste its output.
-2. Prove the behaviour on the running app: the command you ran and its real output, or a
+2. Prove the behaviour on the running app: the exact command plus the output it printed, or a
    screenshot path at phone and desktop size. "Tests pass" on its own is a claim, not proof.
 3. Say plainly what you did not verify.
 

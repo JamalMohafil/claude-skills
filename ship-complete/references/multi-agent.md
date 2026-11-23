@@ -31,9 +31,8 @@ them yourself, after a fetch:
 
 ```sh
 git fetch origin
-git check-ignore -q .worktrees || echo ".worktrees/" >> "$(git rev-parse --git-common-dir)/info/exclude"
-git worktree add -b "feat/<slug>" ".worktrees/<slug>" origin/main
-git -C ".worktrees/<slug>" log -1 --oneline   # confirm the base is what you expect
+mkdir -p ../wt && git worktree add ../wt/<slug> -b "feat/<slug>" origin/main   # outside the repo: nothing to ignore
+git -C ../wt/<slug> rev-parse --short HEAD      # must equal: git rev-parse --short origin/main
 ```
 
 If your agent tool creates worktrees for you (for example a subagent with `isolation:
@@ -76,7 +75,7 @@ cd "/tmp/verify-$sha" && <install deps> && <typecheck> && <tests>
 cd - && git worktree remove --force "/tmp/verify-$sha"
 ```
 
-Or push the branch and wait for CI on that exact commit. Passing locally is not passing CI.
+Or push the branch and wait for the pipeline on that exact commit; a green local run proves less.
 
 ## 5. Briefs a stopped agent can resume from
 
@@ -176,7 +175,7 @@ Report status with its evidence:
 |---|---|---|
 | <name> | live / merged, not deployed / in progress / not started / broken | <commit, URL + screenshot, log line> |
 
-## 9. Hand the final call to the human
+## 9. The human decides the finish
 
 Mark nothing as accepted. Agents open pull requests, deploy when allowed, and hand over the
 proof pack; the human accepts or rejects. Never force-push, never merge without the human's
